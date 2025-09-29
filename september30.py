@@ -93,4 +93,4 @@ while True:
     
     # 4. WAIT
     print("Waiting for 60 seconds before the next check...")
-    time.sleep(60) # Pauses the script for 60 seconds
+    time.sleep(60*60*3) # Pauses the script for 3 hours
