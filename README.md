@@ -57,7 +57,9 @@ SECRET_KEY="YOUR_ALPACA_SECRET_KEY"
 
 ### 6. Run the Bot
 You're all set! Start the bot with this command:
+```bash
 python september30.py
+```
 
 The script will now run in a loop, checking for trading signals every minute.
 
