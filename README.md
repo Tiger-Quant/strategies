@@ -67,7 +67,7 @@ The script will now run in a loop, checking for trading signals every minute.
 This method is perfect for a workshop or for users who don't want to set up a local Python environment.
 
 ### 1. Open Google Colab
-Navigate to colab.research.google.com and create a new notebook.
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Tiger-Quant/strategies/blob/main/september30.ipynb)
 
 ### 2. Add API Keys via Secrets Manager
 Colab has a secure way to store your keys for each session.
