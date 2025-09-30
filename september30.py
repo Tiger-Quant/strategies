@@ -18,19 +18,14 @@ trading_client = TradingClient(API_KEY, SECRET_KEY, paper=True)
 account = trading_client.get_account()
 print(f"Connection successful. Account status: {account.status}")
 
-# Connect to Alpaca Market Data API and create request
+# Connect to Alpaca Market Data API and define request
 data_client = StockHistoricalDataClient(API_KEY, SECRET_KEY)
 
 request_params = StockBarsRequest(
     symbol_or_symbols=["SPY"],
     timeframe=TimeFrame.Day,
-    start="2022-01-01"
+    start="2025-01-01"
 )
-
-bars = data_client.get_stock_bars(request_params)
-data = bars.df
-print("Successfully fetched historical data for SPY:\n")
-print(data.tail())
 
 # Apply SMA logic
 # To make it automated, we need to put it in a loop that runs continuously.
@@ -43,13 +38,22 @@ print(data.tail())
 while True: 
     print(f"Checking for signals at {pd.Timestamp.now(tz='America/Chicago').isoformat()} ---")
 
-    # 1. FETCH DATA (already done in the previous step, assuming 'data' DataFrame exists)
+    # 1. FETCH DATA
+    bars = data_client.get_stock_bars(request_params)
+    data = bars.df
+    if data.empty:
+        print("No data received, waiting for next cycle.")
+        time.sleep(60 * 60 * 3) # Wait 3 hours
+        continue
+    else: 
+        print("Successfully fetched historical data for SPY:\n")
+        print(data.tail())
     
+
     # 2. ANALYZE DATA
     data['SMA50'] = data['close'].rolling(window=50).mean()
     data['Position'] = np.where(data['close'] > data['SMA50'], 1, 0)
     data['Signal'] = data['Position'].diff()
-    
     
     # Let's look at the most recent data point
     latest_close = data['close'].iloc[-1]
@@ -57,6 +61,7 @@ while True:
 
     print(f"Latest Close: {latest_close:.2f}")
     print(f"Latest Signal: {latest_signal}")
+
 
     # 3. ACT (make trade)
     # Check current position and signal first
@@ -92,5 +97,5 @@ while True:
     
     
     # 4. WAIT
-    print("Waiting for 60 seconds before the next check...")
-    time.sleep(60*60*3) # Pauses the script for 3 hours
+    print("Waiting for 3 hours before the next check...")
+    time.sleep(60 * 60 * 3) # Pauses the script for 3 hours
