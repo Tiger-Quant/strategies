@@ -188,7 +188,7 @@ def run_bot(dry_run=False):
 
 
 if __name__ == "__main__":
-    run_bot(dry_run=True)
+    run_bot(dry_run=False)
 
 
 # if __name__ == "__main__":
