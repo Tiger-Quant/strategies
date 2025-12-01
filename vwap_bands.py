@@ -11,7 +11,6 @@ from alpaca.trading.requests import MarketOrderRequest
 from alpaca.trading.enums import OrderSide, TimeInForce
 
 
-
 load_dotenv()
 API_KEY = os.getenv("API_KEY")
 SECRET_KEY = os.getenv("SECRET_KEY")
@@ -76,7 +75,7 @@ def get_current_position():
         return float(pos.qty)
     except:
         return 0.0
-    
+
 
 def execute_trade(signal, current_qty):
     """
@@ -88,7 +87,12 @@ def execute_trade(signal, current_qty):
         trading_client.close_all_positions(cancel_orders=True)
         time.sleep(2)
 
-        req = MarketOrderRequest(symbol=SYMBOL, qty=QUANTITY, side=OrderSide.BUY, time_in_force=TimeInForce.DAY)
+        req = MarketOrderRequest(
+            symbol=SYMBOL,
+            qty=QUANTITY,
+            side=OrderSide.BUY,
+            time_in_force=TimeInForce.DAY,
+        )
         trading_client.submit_order(order_data=req)
 
     elif signal == -1 and current_qty >= 0:
@@ -96,9 +100,14 @@ def execute_trade(signal, current_qty):
         trading_client.close_all_positions(cancel_orders=True)
         time.sleep(2)
 
-        req = MarketOrderRequest(symbol=SYMBOL, qty=QUANTITY, side=OrderSide.SELL, time_in_force=TimeInForce.DAY)
+        req = MarketOrderRequest(
+            symbol=SYMBOL,
+            qty=QUANTITY,
+            side=OrderSide.SELL,
+            time_in_force=TimeInForce.DAY,
+        )
         trading_client.submit_order(order_data=req)
-    
+
     elif signal == 0 and current_qty != 0:
         print(f"SIGNAL: EXIT. Closing position.")
         trading_client.close_all_positions(cancel_orders=True)
@@ -106,19 +115,24 @@ def execute_trade(signal, current_qty):
     else:
         print("No action required.")
 
+
 def run_bot(dry_run=False):
     print(f"Starting Bot (Dry Run: {dry_run})...")
-    
+
     while True:
         try:
             clock = trading_client.get_clock()
             if not clock.is_open and not dry_run:
                 # Calculate time until open
-                opening_time = clock.next_open.replace(tzinfo=dt.timezone.utc).timestamp()
+                opening_time = clock.next_open.replace(
+                    tzinfo=dt.timezone.utc
+                ).timestamp()
                 curr_time = clock.timestamp.replace(tzinfo=dt.timezone.utc).timestamp()
                 time_to_open = int(opening_time - curr_time) / 60
-                
-                print(f"Market is closed. Opens in {time_to_open:.0f} minutes. Sleeping for 60s...")
+
+                print(
+                    f"Market is closed. Opens in {time_to_open:.0f} minutes. Sleeping for 60s..."
+                )
                 time.sleep(60)
                 continue
 
@@ -128,36 +142,39 @@ def run_bot(dry_run=False):
                 print("No data. Sleeping...")
                 time.sleep(60)
                 continue
-                
+
             df = calculate_indicators(df)
-            
+
             # Analyze Latest Bar
             latest = df.iloc[-1]
-            print(f"[{dt.datetime.now().strftime('%H:%M:%S')}] Price: {latest['close']:.2f} | VWAP: {latest['vwap']:.2f} | L: {latest['lower_band']:.2f} | U: {latest['upper_band']:.2f}")
+            print(
+                f"[{dt.datetime.now().strftime('%H:%M:%S')}] Price: {latest['close']:.2f} | VWAP: {latest['vwap']:.2f} | L: {latest['lower_band']:.2f} | U: {latest['upper_band']:.2f}"
+            )
 
             # Signal Logic
             signal = 0
-            if latest['close'] < latest['lower_band']:
+            if latest["close"] < latest["lower_band"]:
                 signal = 1  # Long
-            elif latest['close'] > latest['upper_band']:
-                signal = -1 # Short
-            
+            elif latest["close"] > latest["upper_band"]:
+                signal = -1  # Short
+
             current_qty = get_current_position()
-            if current_qty > 0 and latest['close'] >= latest['vwap']:
-                signal = 0 # Exit Long
-            elif current_qty < 0 and latest['close'] <= latest['vwap']:
-                signal = 0 # Exit Short
+            if current_qty > 0 and latest["close"] >= latest["vwap"]:
+                signal = 0  # Exit Long
+            elif current_qty < 0 and latest["close"] <= latest["vwap"]:
+                signal = 0  # Exit Short
 
             # Execute
             # In DRY_RUN mode, force execution logic to print, even if market is closed
             if dry_run:
-                if signal == 1: print("   [DRY RUN] Would BUY now.")
-                elif signal == -1: print("   [DRY RUN] Would SELL SHORT now.")
-                elif signal == 0 and current_qty != 0: print("   [DRY RUN] Would EXIT now.")
+                if signal == 1:
+                    print("   [DRY RUN] Would BUY now.")
+                elif signal == -1:
+                    print("   [DRY RUN] Would SELL SHORT now.")
+                elif signal == 0 and current_qty != 0:
+                    print("   [DRY RUN] Would EXIT now.")
             else:
-                # Real Trading Mode
-                if signal != 0:
-                     execute_trade(signal, current_qty)
+                execute_trade(signal, current_qty)
 
             # Sleep
             time.sleep(60)
@@ -169,9 +186,9 @@ def run_bot(dry_run=False):
             print(f"Critical Error: {e}")
             time.sleep(60)
 
+
 if __name__ == "__main__":
     run_bot(dry_run=True)
-
 
 
 # if __name__ == "__main__":
