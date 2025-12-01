@@ -170,7 +170,7 @@ def run_bot(dry_run=False):
             time.sleep(60)
 
 if __name__ == "__main__":
-    run_bot(dry_run=True)
+    run_bot(dry_run=False)
 
 
 
