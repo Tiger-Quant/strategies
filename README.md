@@ -45,7 +45,7 @@ Install all the required Python libraries from the `requirements.txt` file.
 pip install -r requirements.txt
 ```
 
-### 5. Add Your AI Keys
+### 5. Add Your API Keys
 Your secret API keys should never be saved in your code. We'll use a `.env` file to store them securely.
 
 1. Create a new file in the project folder named `.env`.
