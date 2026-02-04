@@ -88,7 +88,7 @@ while True:
         trading_client.submit_order(
         symbol="SPY",
         qty=1,
-        side="buy",
+        side="sell",
         type="market",
         time_in_force="gtc" # good-til-cancelled
     )
